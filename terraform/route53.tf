@@ -1,6 +1,6 @@
 module "zones" {
   source  = "terraform-aws-modules/route53/aws//modules/zones"
-  version = "~> 3.0"
+  version = "4.1.0"
 
   zones = {
     "${var.route53_dns_zone_name}" = {
@@ -65,3 +65,4 @@ module "zones" {
 #   description = "Name servers of the Route53 zone"
 #   value       = module.zones.route53_zone_name_servers[var.route53_dns_zone_name]
 # } 
+
