@@ -28,3 +28,8 @@ variable "database_subnets_list" {
   description = "List of CIDR ranges for database subnets"
   type        = list(string)
 }
+
+variable "route53_dns_zone_name" {
+  description = "The name of the Route53 DNS zone (e.g., example.com)"
+  type        = string
+}
