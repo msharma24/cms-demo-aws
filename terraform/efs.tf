@@ -9,6 +9,33 @@ module "efs" {
   performance_mode = "generalPurpose"
   throughput_mode  = "bursting"
 
+  # File system policy to allow read/write access
+  attach_policy = true
+  bypass_policy_lockout_safety_check = false
+  policy_statements = [
+    {
+      sid     = "AllowECSAccess"
+      actions = [
+        "elasticfilesystem:ClientMount",
+        "elasticfilesystem:ClientWrite",
+        "elasticfilesystem:ClientRootAccess"
+      ]
+      principals = [
+        {
+          type = "AWS"
+          identifiers = ["*"]
+        }
+      ]
+      conditions = [
+        {
+          test     = "Bool"
+          variable = "aws:SecureTransport"
+          values   = ["true"]
+        }
+      ]
+    }
+  ]
+
   # Mount targets / security group
   mount_targets = {
     for subnet in module.vpc.private_subnets : subnet => {
@@ -37,7 +64,7 @@ module "efs" {
     }
   }
 
-  # Access points
+  # Access points with proper permissions
   access_points = {
     wordpress = {
       posix_user = {
@@ -49,10 +76,15 @@ module "efs" {
         creation_info = {
           owner_gid   = 33
           owner_uid   = 33
-          permissions = "0755"
+          permissions = "0777" # Temporarily more permissive for debugging
         }
       }
     }
+  }
+
+  # Lifecycle policy
+  lifecycle_policy = {
+    transition_to_ia = "AFTER_30_DAYS"
   }
 
   tags = {

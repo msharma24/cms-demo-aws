@@ -49,6 +49,7 @@ module "wordpress_service" {
       actions = [
         "elasticfilesystem:ClientMount",
         "elasticfilesystem:ClientWrite",
+        "elasticfilesystem:ClientRootAccess",
         "elasticfilesystem:DescribeMountTargets",
         "elasticfilesystem:DescribeFileSystems"
       ]
