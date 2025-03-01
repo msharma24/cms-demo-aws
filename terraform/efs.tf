@@ -68,46 +68,46 @@ module "efs" {
   access_points = {
     wordpress = {
       posix_user = {
-        gid = 0  # root group for initial setup
-        uid = 0  # root user for initial setup
-        secondary_gids = [1001]  # Allow daemon user access
+        gid = 1001  # daemon user in Bitnami containers
+        uid = 1001  # daemon user in Bitnami containers
+        secondary_gids = [0]  # Allow root group access for initialization
       }
       root_directory = {
         path = "/"
         creation_info = {
-          owner_gid   = 1001  # daemon user in Bitnami containers
-          owner_uid   = 1001  # daemon user in Bitnami containers
-          permissions = "0755"
+          owner_gid   = 1001
+          owner_uid   = 1001
+          permissions = "0775"  # More permissive for group write
         }
       }
     }
     apache = {
       posix_user = {
-        gid = 0  # root group for Apache setup
-        uid = 0  # root user for Apache setup
-        secondary_gids = [1001]  # Allow daemon user access
+        gid = 1001
+        uid = 1001
+        secondary_gids = [0]
       }
       root_directory = {
         path = "/apache"
         creation_info = {
           owner_gid   = 1001
           owner_uid   = 1001
-          permissions = "0755"
+          permissions = "0775"
         }
       }
     }
     php = {
       posix_user = {
-        gid = 0  # root group for PHP setup
-        uid = 0  # root user for PHP setup
-        secondary_gids = [1001]  # Allow daemon user access
+        gid = 1001
+        uid = 1001
+        secondary_gids = [0]
       }
       root_directory = {
         path = "/php"
         creation_info = {
           owner_gid   = 1001
           owner_uid   = 1001
-          permissions = "0755"
+          permissions = "0775"
         }
       }
     }

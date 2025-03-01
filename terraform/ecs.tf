@@ -87,6 +87,30 @@ module "wordpress_service" {
           value = "true"
         },
         {
+          name  = "WP_DEBUG"
+          value = "true"
+        },
+        {
+          name  = "WP_DEBUG_LOG"
+          value = "true"
+        },
+        {
+          name  = "WP_DEBUG_DISPLAY"
+          value = "false"
+        },
+        {
+          name  = "APACHE_LOG_LEVEL"
+          value = "debug"
+        },
+        {
+          name  = "PHP_ERROR_LOG"
+          value = "/opt/bitnami/php/logs/error.log"
+        },
+        {
+          name  = "PHP_DISPLAY_ERRORS"
+          value = "On"
+        },
+        {
           name  = "WORDPRESS_SKIP_BOOTSTRAP"
           value = "no"
         },
@@ -172,7 +196,7 @@ module "wordpress_service" {
         },
         {
           name  = "APACHE_VHOSTS_DIR"
-          value = "/opt/bitnami/apache/conf/vhosts"
+          value = "/opt/bitnami/apache/conf/bitnami"
         },
         {
           name  = "APACHE_HTTPS_PORT_NUMBER"
@@ -182,7 +206,9 @@ module "wordpress_service" {
 
       # Add initialization command to create directories and set permissions
       entrypoint = ["/bin/bash", "-c"]
-      command    = ["mkdir -p /opt/bitnami/wordpress/wp-content /opt/bitnami/apache/conf/bitnami /opt/bitnami/apache/conf/vhosts /opt/bitnami/php/etc /opt/bitnami/php/var/run && cp -rp /opt/bitnami/wordpress/* /bitnami/wordpress/ 2>/dev/null || true && cp -rp /opt/bitnami/apache/conf/* /bitnami/apache/conf/ 2>/dev/null || true && cp -rp /opt/bitnami/php/etc/* /bitnami/php/etc/ 2>/dev/null || true && touch /bitnami/apache/conf/httpd.conf /bitnami/apache/conf/bitnami/bitnami.conf /bitnami/apache/conf/bitnami/bitnami-ssl.conf /bitnami/php/etc/php.ini && ln -sfn /bitnami/wordpress /opt/bitnami/wordpress && ln -sfn /bitnami/apache/conf /opt/bitnami/apache/conf && ln -sfn /bitnami/php/etc /opt/bitnami/php/etc && chown -R 1001:1001 /opt/bitnami /bitnami && chmod -R u+rwX /opt/bitnami /bitnami && exec /opt/bitnami/scripts/wordpress/entrypoint.sh /opt/bitnami/scripts/apache/run.sh"]
+      command    = [
+        "set -e && mkdir -p /bitnami/wordpress /bitnami/apache/conf/bitnami /bitnami/apache/conf/vhosts /bitnami/php/etc /bitnami/php/var/run /bitnami/php/logs && cp -rp /opt/bitnami/wordpress/* /bitnami/wordpress/ 2>/dev/null || true && cp -rp /opt/bitnami/apache/conf/* /bitnami/apache/conf/ 2>/dev/null || true && cp -rp /opt/bitnami/php/etc/* /bitnami/php/etc/ 2>/dev/null || true && chown -R 1001:1001 /bitnami && chmod -R 775 /bitnami && find /bitnami -type d -exec chmod 775 {} \\; && find /bitnami -type f -exec chmod 664 {} \\; && ln -sfn /bitnami/wordpress /opt/bitnami/wordpress && ln -sfn /bitnami/apache/conf /opt/bitnami/apache/conf && ln -sfn /bitnami/php/etc /opt/bitnami/php/etc && ln -sfn /bitnami/php/logs /opt/bitnami/php/logs && exec /opt/bitnami/scripts/wordpress/entrypoint.sh /opt/bitnami/scripts/apache/run.sh"
+      ]
 
       # Run as root for initialization
       user = "0:0"
