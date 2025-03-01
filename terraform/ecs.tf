@@ -167,7 +167,7 @@ module "wordpress_service" {
       # Add initialization command to create directories and set permissions
       entrypoint = ["/bin/bash", "-c"]
       command    = [
-        "chown -R 1001:1001 /bitnami/wordpress /opt/bitnami/apache /opt/bitnami/php && chmod -R u+rwX /bitnami/wordpress /opt/bitnami/apache /opt/bitnami/php && exec /opt/bitnami/scripts/wordpress/entrypoint.sh /opt/bitnami/scripts/apache/run.sh"
+        "mkdir -p /opt/bitnami/apache/conf /opt/bitnami/php/etc /opt/bitnami/php/var/run /bitnami/wordpress && cp -rp /opt/bitnami/apache/conf.defaults/* /opt/bitnami/apache/conf/ && cp -rp /opt/bitnami/php/etc.defaults/* /opt/bitnami/php/etc/ && chown -R 1001:1001 /bitnami/wordpress /opt/bitnami/apache /opt/bitnami/php && chmod -R u+rwX /bitnami/wordpress /opt/bitnami/apache /opt/bitnami/php && exec /opt/bitnami/scripts/wordpress/entrypoint.sh /opt/bitnami/scripts/apache/run.sh"
       ]
 
       # Run as root for initialization
