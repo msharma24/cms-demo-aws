@@ -1,6 +1,6 @@
 locals {
   container_name = "wordpress"
-  container_port = 80
+  container_port = 8080
 }
 
 module "ecs_cluster" {
@@ -55,6 +55,13 @@ module "wordpress_service" {
       ]
       resources = [module.efs.arn]
       effect    = "Allow"
+    },
+    {
+      actions = [
+        "secretsmanager:GetSecretValue"
+      ]
+      resources = [aws_secretsmanager_secret.dockerhub_credentials.arn]
+      effect    = "Allow"
     }
   ]
 
@@ -73,6 +80,10 @@ module "wordpress_service" {
       image     = "wordpress:latest"
       user      = "33:33"  # Run as www-data user
       
+      repository_credentials = {
+        credentialsParameter = aws_secretsmanager_secret.dockerhub_credentials.arn
+      }
+
       port_mappings = [
         {
           name          = local.container_name
@@ -104,6 +115,26 @@ module "wordpress_service" {
           value = "6379"  # Default Redis port
         },
         {
+          name  = "APACHE_RUN_USER"
+          value = "www-data"
+        },
+        {
+          name  = "APACHE_RUN_GROUP"
+          value = "www-data"
+        },
+        {
+          name  = "APACHE_RUN_DIR"
+          value = "/var/run/apache2"
+        },
+        {
+          name  = "APACHE_PID_FILE"
+          value = "/var/run/apache2/apache2.pid"
+        },
+        {
+          name  = "APACHE_LOG_DIR"
+          value = "/var/log/apache2"
+        },
+        {
           name  = "WORDPRESS_CONFIG_EXTRA"
           value = "define('FS_METHOD', 'direct'); define('WP_TEMP_DIR', '/var/www/html/tmp'); define('WP_DEBUG', true);"
         }
@@ -112,7 +143,7 @@ module "wordpress_service" {
       entrypoint = [
         "sh",
         "-c",
-        "mkdir -p /var/www/html/tmp && chmod 775 /var/www/html/tmp && chown www-data:www-data /var/www/html/tmp && docker-entrypoint.sh apache2-foreground"
+        "mkdir -p /var/www/html/tmp /var/run/apache2 /var/log/apache2 && chmod 775 /var/www/html/tmp /var/run/apache2 /var/log/apache2 && chown www-data:www-data /var/www/html/tmp /var/run/apache2 /var/log/apache2 && sed -i 's/Listen 80/Listen 8080/g' /etc/apache2/ports.conf && sed -i 's/:80/:8080/g' /etc/apache2/sites-enabled/000-default.conf && docker-entrypoint.sh apache2-foreground"
       ]
 
       secrets = [
@@ -205,6 +236,37 @@ module "wordpress_log_group" {
     Project     = "cms"
     Service     = "wordpress"
   }
+}
+
+# Docker Hub credentials in AWS Secrets Manager
+resource "aws_secretsmanager_secret" "dockerhub_credentials" {
+  name = "cms-${var.environment}-dockerhub-credentials"
+  
+  tags = {
+    Environment = var.environment
+    Terraform   = "true"
+    Project     = "cms"
+    Service     = "wordpress"
+  }
+}
+
+resource "aws_secretsmanager_secret_version" "dockerhub_credentials" {
+  secret_id = aws_secretsmanager_secret.dockerhub_credentials.id
+  secret_string = jsonencode({
+    username = var.dockerhub_username
+    password = var.dockerhub_password
+  })
+}
+
+variable "dockerhub_username" {
+  description = "Docker Hub username"
+  type        = string
+}
+
+variable "dockerhub_password" {
+  description = "Docker Hub password or access token"
+  type        = string
+  sensitive   = true
 }
 
 # Outputs
