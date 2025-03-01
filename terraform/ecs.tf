@@ -83,6 +83,22 @@ module "wordpress_service" {
 
       environment = [
         {
+          name  = "BITNAMI_DEBUG"
+          value = "true"
+        },
+        {
+          name  = "WORDPRESS_SKIP_BOOTSTRAP"
+          value = "no"
+        },
+        {
+          name  = "WORDPRESS_ENABLE_HTTPS"
+          value = "yes"
+        },
+        {
+          name  = "WORDPRESS_BLOG_NAME"
+          value = "WordPress on ECS"
+        },
+        {
           name  = "WORDPRESS_DATABASE_HOST"
           value = module.aurora_mysql.cluster_endpoint
         },
@@ -99,16 +115,8 @@ module "wordpress_service" {
           value = "wordpress"
         },
         {
-          name  = "WORDPRESS_BLOG_NAME"
-          value = "WordPress on ECS"
-        },
-        {
           name  = "WORDPRESS_TABLE_PREFIX"
           value = "wp_"
-        },
-        {
-          name  = "WORDPRESS_ENABLE_HTTPS"
-          value = "yes"
         },
         {
           name  = "WORDPRESS_ENABLE_XML_RPC"
@@ -117,10 +125,6 @@ module "wordpress_service" {
         {
           name  = "WORDPRESS_AUTO_UPDATE_LEVEL"
           value = "none"
-        },
-        {
-          name  = "WORDPRESS_SKIP_BOOTSTRAP"
-          value = "no"
         },
         {
           name  = "WORDPRESS_EXTRA_WP_CONFIG_CONTENT"
@@ -149,8 +153,25 @@ module "wordpress_service" {
         {
           name  = "PHP_UPLOAD_MAX_FILESIZE"
           value = "128M"
+        },
+        {
+          name  = "PHP_ENABLE_OPCACHE"
+          value = "yes"
+        },
+        {
+          name  = "PHP_EXPOSE_PHP"
+          value = "no"
         }
       ]
+
+      # Add initialization command to create directories and set permissions
+      entrypoint = ["/bin/bash", "-c"]
+      command    = [
+        "chown -R 1001:1001 /bitnami/wordpress /opt/bitnami/apache /opt/bitnami/php && chmod -R u+rwX /bitnami/wordpress /opt/bitnami/apache /opt/bitnami/php && exec /opt/bitnami/scripts/wordpress/entrypoint.sh /opt/bitnami/scripts/apache/run.sh"
+      ]
+
+      # Run as root for initialization
+      user = "0:0"
 
       secrets = [
         {
