@@ -64,26 +64,53 @@ module "efs" {
     }
   }
 
-  # Access points with proper permissions
+  # Access points with proper permissions for Bitnami WordPress
   access_points = {
     wordpress = {
       posix_user = {
-        gid = 33 # www-data
-        uid = 33 # www-data
-        secondary_gids = [33]
+        gid = 1001  # daemon user in Bitnami containers
+        uid = 1001  # daemon user in Bitnami containers
       }
       root_directory = {
-        path = "/wordpress"
+        path = "/"  # Root path for access point
         creation_info = {
-          owner_gid   = 33
-          owner_uid   = 33
-          permissions = "0775"  # More permissive for WordPress
+          owner_gid   = 1001
+          owner_uid   = 1001
+          permissions = "0775"  # More permissive for WordPress plugins/themes
+        }
+      }
+    }
+    apache = {
+      posix_user = {
+        gid = 1001  # daemon user in Bitnami containers
+        uid = 1001  # daemon user in Bitnami containers
+      }
+      root_directory = {
+        path = "/apache"
+        creation_info = {
+          owner_gid   = 1001
+          owner_uid   = 1001
+          permissions = "0775"
+        }
+      }
+    }
+    php = {
+      posix_user = {
+        gid = 1001  # daemon user in Bitnami containers
+        uid = 1001  # daemon user in Bitnami containers
+      }
+      root_directory = {
+        path = "/php"
+        creation_info = {
+          owner_gid   = 1001
+          owner_uid   = 1001
+          permissions = "0775"
         }
       }
     }
   }
 
-  # Lifecycle policy
+  # Lifecycle policy for cost optimization
   lifecycle_policy = {
     transition_to_ia = "AFTER_30_DAYS"
   }
