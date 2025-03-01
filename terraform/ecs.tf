@@ -43,6 +43,20 @@ module "wordpress_service" {
   subnet_ids         = module.vpc.private_subnets
   enable_execute_command = true
 
+  # Task role permissions for EFS
+  tasks_iam_role_statements = [
+    {
+      actions = [
+        "elasticfilesystem:ClientMount",
+        "elasticfilesystem:ClientWrite",
+        "elasticfilesystem:DescribeMountTargets",
+        "elasticfilesystem:DescribeFileSystems"
+      ]
+      resources = [module.efs.arn]
+      effect    = "Allow"
+    }
+  ]
+
   runtime_platform = {
     platform_version = "LATEST"
     operating_system = "LINUX"
@@ -116,9 +130,16 @@ module "wordpress_service" {
 
   volume = {
     wordpress-data = {
+      name = "wordpress-data"
       efs_volume_configuration = {
-        file_system_id = module.efs.id
-        root_directory = "/"
+        file_system_id          = module.efs.id
+        root_directory          = "/"
+        transit_encryption      = "ENABLED"
+        transit_encryption_port = 2049
+        authorization_config = {
+          access_point_id = module.efs.access_points["wordpress"].id
+          iam            = "ENABLED"
+        }
       }
     }
   }
