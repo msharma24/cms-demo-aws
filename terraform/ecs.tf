@@ -161,14 +161,28 @@ module "wordpress_service" {
         {
           name  = "PHP_EXPOSE_PHP"
           value = "no"
+        },
+        {
+          name  = "APACHE_ENABLE_CUSTOM_CONF"
+          value = "yes"
+        },
+        {
+          name  = "APACHE_CONF_FILE"
+          value = "/opt/bitnami/apache/conf/httpd.conf"
+        },
+        {
+          name  = "APACHE_VHOSTS_DIR"
+          value = "/opt/bitnami/apache/conf/vhosts"
+        },
+        {
+          name  = "APACHE_HTTPS_PORT_NUMBER"
+          value = "8443"
         }
       ]
 
       # Add initialization command to create directories and set permissions
       entrypoint = ["/bin/bash", "-c"]
-      command    = [
-        "mkdir -p /opt/bitnami/apache/conf /opt/bitnami/php/etc /opt/bitnami/php/var/run /bitnami/wordpress && cp -rp /opt/bitnami/apache/conf.defaults/* /opt/bitnami/apache/conf/ && cp -rp /opt/bitnami/php/etc.defaults/* /opt/bitnami/php/etc/ && chown -R 1001:1001 /bitnami/wordpress /opt/bitnami/apache /opt/bitnami/php && chmod -R u+rwX /bitnami/wordpress /opt/bitnami/apache /opt/bitnami/php && exec /opt/bitnami/scripts/wordpress/entrypoint.sh /opt/bitnami/scripts/apache/run.sh"
-      ]
+      command    = ["mkdir -p /opt/bitnami/wordpress/wp-content /opt/bitnami/apache/conf/bitnami /opt/bitnami/apache/conf/vhosts /opt/bitnami/php/etc /opt/bitnami/php/var/run && cp -rp /opt/bitnami/wordpress/* /bitnami/wordpress/ 2>/dev/null || true && cp -rp /opt/bitnami/apache/conf/* /bitnami/apache/conf/ 2>/dev/null || true && cp -rp /opt/bitnami/php/etc/* /bitnami/php/etc/ 2>/dev/null || true && touch /bitnami/apache/conf/httpd.conf /bitnami/apache/conf/bitnami/bitnami.conf /bitnami/apache/conf/bitnami/bitnami-ssl.conf /bitnami/php/etc/php.ini && ln -sfn /bitnami/wordpress /opt/bitnami/wordpress && ln -sfn /bitnami/apache/conf /opt/bitnami/apache/conf && ln -sfn /bitnami/php/etc /opt/bitnami/php/etc && chown -R 1001:1001 /opt/bitnami /bitnami && chmod -R u+rwX /opt/bitnami /bitnami && exec /opt/bitnami/scripts/wordpress/entrypoint.sh /opt/bitnami/scripts/apache/run.sh"]
 
       # Run as root for initialization
       user = "0:0"
@@ -188,12 +202,12 @@ module "wordpress_service" {
         },
         {
           sourceVolume  = "apache-data"
-          containerPath = "/opt/bitnami/apache"
+          containerPath = "/bitnami/apache"
           readOnly      = false
         },
         {
           sourceVolume  = "php-data"
-          containerPath = "/opt/bitnami/php"
+          containerPath = "/bitnami/php"
           readOnly      = false
         }
       ]
