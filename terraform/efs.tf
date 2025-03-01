@@ -70,13 +70,14 @@ module "efs" {
       posix_user = {
         gid = 33 # www-data
         uid = 33 # www-data
+        secondary_gids = [33]
       }
       root_directory = {
         path = "/wordpress"
         creation_info = {
           owner_gid   = 33
           owner_uid   = 33
-          permissions = "0777" # Temporarily more permissive for debugging
+          permissions = "0775"  # More permissive for WordPress
         }
       }
     }

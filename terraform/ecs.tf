@@ -71,6 +71,8 @@ module "wordpress_service" {
       memory    = 2048
       essential = true
       image     = "wordpress:latest"
+      user      = "33:33"  # Run as www-data user
+      
       port_mappings = [
         {
           name          = local.container_name
@@ -100,7 +102,17 @@ module "wordpress_service" {
         {
           name  = "WORDPRESS_REDIS_PORT"
           value = "6379"  # Default Redis port
+        },
+        {
+          name  = "WORDPRESS_CONFIG_EXTRA"
+          value = "define('FS_METHOD', 'direct'); define('WP_TEMP_DIR', '/var/www/html/tmp'); define('WP_DEBUG', true);"
         }
+      ]
+
+      entrypoint = [
+        "sh",
+        "-c",
+        "mkdir -p /var/www/html/tmp && chmod 775 /var/www/html/tmp && chown www-data:www-data /var/www/html/tmp && docker-entrypoint.sh apache2-foreground"
       ]
 
       secrets = [
