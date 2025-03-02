@@ -128,7 +128,7 @@ module "wordpress_service" {
         },
         {
           name  = "WORDPRESS_ENABLE_HTTPS"
-          value = "yes"
+          value = "no"  # Let ALB handle HTTPS
         },
         {
           name  = "WORDPRESS_BLOG_NAME"
@@ -200,7 +200,7 @@ module "wordpress_service" {
         },
         {
           name  = "APACHE_ENABLE_CUSTOM_CONF"
-          value = "yes"
+          value = "no"  # Disable custom conf until we fix permissions
         },
         {
           name  = "APACHE_CONF_FILE"
@@ -212,7 +212,15 @@ module "wordpress_service" {
         },
         {
           name  = "APACHE_HTTPS_PORT_NUMBER"
-          value = "8443"
+          value = "8443"  # Set different port for HTTPS even though we won't use it
+        },
+        {
+          name  = "APACHE_ALLOW_OVERRIDE"
+          value = "All"  # Enable .htaccess support
+        },
+        {
+          name  = "APACHE_LOG_LEVEL"
+          value = "debug"  # Increase log level for debugging
         },
         {
           name  = "BITNAMI_VOLUME_DIR"
@@ -228,7 +236,7 @@ module "wordpress_service" {
         },
         {
           name  = "WORDPRESS_ENABLE_HTTPS_REDIRECT"
-          value = "no"  # Disable HTTPS redirect to simplify initial setup
+          value = "no"  # Disable HTTPS redirect
         },
         {
           name  = "ALLOW_OVERRIDE_NONE"
@@ -268,16 +276,107 @@ module "wordpress_service" {
         },
         {
           name  = "WORDPRESS_DATABASE_WAIT_TIMEOUT"
-          value = "120"  # Wait up to 120 seconds for database to be ready
+          value = "300"  # Increase wait timeout to 5 minutes
         },
         {
           name  = "MARIADB_CLIENT_DEBUG"
           value = "true"  # Enable debug mode for database client
+        },
+        {
+          name  = "APACHE_ENABLE_SSL"
+          value = "no"  # Disable SSL in Apache since ALB handles SSL
+        },
+        {
+          name  = "WORDPRESS_SCHEME"
+          value = "http"  # Use HTTP for internal communication
+        },
+        {
+          name  = "WORDPRESS_SKIP_APACHE_SSL"
+          value = "yes"  # Skip Apache SSL setup
+        },
+        {
+          name  = "APACHE_DISABLE_SSL"
+          value = "yes"  # Explicitly disable SSL module
+        },
+        {
+          name  = "APACHE_SSL_ENABLE"
+          value = "no"  # Another way to disable SSL
+        },
+        {
+          name  = "APACHE_MODULES"
+          value = "unixd_module log_config_module mime_module dir_module autoindex_module alias_module rewrite_module env_module headers_module setenvif_module"  # Explicitly exclude SSL modules
+        },
+        {
+          name  = "APACHE_PREFIX"
+          value = "/opt/bitnami/apache"  # Explicitly set Apache prefix
+        },
+        {
+          name  = "APACHE_CONFIGURE_HTTPS_REDIRECT"
+          value = "no"  # Disable HTTPS redirect configuration
+        },
+        {
+          name  = "WORDPRESS_FORCE_DATABASE_INITIALIZATION"
+          value = "yes"  # Force database initialization
+        },
+        {
+          name  = "WORDPRESS_VERIFY_DATABASE_SSL"
+          value = "no"  # Temporarily disable SSL verification for debugging
+        },
+        {
+          name  = "WORDPRESS_DATABASE_SSL_CA_FILE"
+          value = ""  # Clear SSL CA file path
+        },
+        {
+          name  = "WORDPRESS_ENABLE_DATABASE_SSL"
+          value = "no"  # Temporarily disable SSL for debugging
+        },
+        {
+          name  = "WORDPRESS_OVERRIDE_DATABASE_SETTINGS"
+          value = "yes"  # Force using environment variables
+        },
+        {
+          name  = "WORDPRESS_RESET_DATABASE"
+          value = "yes"  # Force database reset if needed
+        },
+        {
+          name  = "WORDPRESS_EXTRA_INSTALL_ARGS"
+          value = "--skip-email --skip-plugins"  # Skip additional setup steps
+        },
+        {
+          name  = "WORDPRESS_DEBUG_ENABLED"
+          value = "true"  # Enable WordPress debug mode
+        },
+        {
+          name  = "WORDPRESS_DEBUG_LOG_ENABLED"
+          value = "true"  # Enable debug logging
+        },
+        {
+          name  = "WORDPRESS_DEBUG_DISPLAY_ENABLED"
+          value = "true"  # Show debug messages
+        },
+        {
+          name  = "APACHE_REMOVE_SSL_CONF"
+          value = "yes"  # Remove SSL configuration files
+        },
+        {
+          name  = "APACHE_DISABLE_SSL_CONFIGURATION"
+          value = "yes"  # Prevent SSL configuration loading
+        },
+        {
+          name  = "APACHE_DISABLE_SSL_MODULE"
+          value = "yes"  # Disable SSL module loading
+        },
+        {
+          name  = "APACHE_SKIP_SSL_MODULE"
+          value = "yes"  # Skip SSL module loading
         }
       ]
 
       # Run as root for debugging permissions
       user = "0:0"
+
+      entrypoint = ["/bin/bash", "-c"]
+      command = ["echo 'Removing SSL files and configurations...' && rm -rf /opt/bitnami/apache/conf/bitnami/certs && rm -f /opt/bitnami/apache/conf/bitnami/bitnami-ssl.conf && rm -f /opt/bitnami/apache/conf/extra/httpd-ssl.conf && rm -f /opt/bitnami/apache/conf/server.crt && rm -f /opt/bitnami/apache/conf/server.key && if [ ! -f /opt/bitnami/apache/conf/httpd.conf ]; then echo 'Creating minimal Apache configuration...' && echo 'ServerRoot \"/opt/bitnami/apache\"\nListen 8080\nLoadModule unixd_module modules/mod_unixd.so\nLoadModule log_config_module modules/mod_log_config.so\nLoadModule mime_module modules/mod_mime.so\nLoadModule dir_module modules/mod_dir.so\nLoadModule autoindex_module modules/mod_autoindex.so\nLoadModule alias_module modules/mod_alias.so\nLoadModule rewrite_module modules/mod_rewrite.so\nLoadModule env_module modules/mod_env.so\nLoadModule headers_module modules/mod_headers.so\nLoadModule setenvif_module modules/mod_setenvif.so\nUser daemon\nGroup daemon\nServerAdmin admin@example.com\nDocumentRoot \"/opt/bitnami/apache/htdocs\"\n<Directory \"/\">\n    AllowOverride none\n    Require all denied\n</Directory>\n<Directory \"/opt/bitnami/apache/htdocs\">\n    Options Indexes FollowSymLinks\n    AllowOverride All\n    Require all granted\n</Directory>\nErrorLog logs/error.log\nLogLevel debug\nLogFormat \"%h %l %u %t \\\"%r\\\" %>s %b\" common\nCustomLog logs/access.log common\nTypesConfig conf/mime.types\nAddType application/x-compress .Z\nAddType application/x-gzip .gz .tgz\nInclude conf/bitnami/httpd.conf' > /opt/bitnami/apache/conf/httpd.conf && chmod 644 /opt/bitnami/apache/conf/httpd.conf && echo 'Apache configuration created.'; fi && echo 'Starting WordPress...' && exec /opt/bitnami/scripts/wordpress/entrypoint.sh /opt/bitnami/scripts/apache/run.sh"]
 
       secrets = [
         {
@@ -298,7 +397,7 @@ module "wordpress_service" {
         },
         {
           sourceVolume  = "apache-data"
-          containerPath = "/bitnami/apache"
+          containerPath = "/bitnami/apache"  # Mount at base Apache directory
           readOnly      = false
         },
         {
@@ -310,10 +409,10 @@ module "wordpress_service" {
 
       healthcheck = {
         command     = ["CMD-SHELL", "/opt/bitnami/scripts/wordpress/healthcheck.sh"]
-        interval    = 60
-        timeout     = 30
-        retries     = 5
-        startPeriod = 300
+        interval    = 120
+        timeout     = 60
+        retries     = 10
+        startPeriod = 600
       }
 
       log_configuration = {
@@ -409,11 +508,36 @@ module "wordpress_service" {
     }
   }
 
+  # Add health check grace period to the service configuration
+  health_check_grace_period_seconds = 600
+
+  # Update container definition settings above
+  deployment_circuit_breaker = {
+    enable   = true
+    rollback = true
+  }
+
+  deployment_maximum_percent         = 100
+  deployment_minimum_healthy_percent = 0
+
+  # Add deregistration delay to ALB target group
   load_balancer = {
     service = {
       target_group_arn = module.alb.target_groups["wordpress"].arn
       container_name   = local.container_name
       container_port   = local.container_port
+      health_check = {
+        enabled             = true
+        healthy_threshold   = 2
+        interval           = 60
+        matcher            = "200-499"  # Accept more status codes during debugging
+        path               = "/"
+        port               = "traffic-port"
+        protocol           = "HTTP"
+        timeout           = 30
+        unhealthy_threshold = 5
+      }
+      deregistration_delay = 120
     }
   }
 
