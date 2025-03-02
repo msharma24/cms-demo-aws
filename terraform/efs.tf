@@ -68,43 +68,43 @@ module "efs" {
   access_points = {
     wordpress = {
       posix_user = {
-        gid = 1001  # Daemon group
-        uid = 1001  # Daemon user
+        gid = 0  # Root group
+        uid = 0  # Root user
       }
       root_directory = {
         path = "/"
         creation_info = {
-          owner_gid   = 1001  # Daemon group owns the files
-          owner_uid   = 1001  # Daemon user owns the files
-          permissions = "0755"  # Standard permissions
+          owner_gid   = 0  # Root group owns the files
+          owner_uid   = 0  # Root user owns the files
+          permissions = "0777"  # Full permissions for debugging
         }
       }
     }
     apache = {
       posix_user = {
-        gid = 1001  # Daemon group
-        uid = 1001  # Daemon user
+        gid = 0  # Root group
+        uid = 0  # Root user
       }
       root_directory = {
         path = "/apache"
         creation_info = {
-          owner_gid   = 1001  # Daemon group owns the files
-          owner_uid   = 1001  # Daemon user owns the files
-          permissions = "0755"  # Standard permissions
+          owner_gid   = 0  # Root group owns the files
+          owner_uid   = 0  # Root user owns the files
+          permissions = "0777"  # Full permissions for debugging
         }
       }
     }
     php = {
       posix_user = {
-        gid = 1001  # Daemon group
-        uid = 1001  # Daemon user
+        gid = 0  # Root group
+        uid = 0  # Root user
       }
       root_directory = {
         path = "/php"
         creation_info = {
-          owner_gid   = 1001  # Daemon group owns the files
-          owner_uid   = 1001  # Daemon user owns the files
-          permissions = "0755"  # Standard permissions
+          owner_gid   = 0  # Root group owns the files
+          owner_uid   = 0  # Root user owns the files
+          permissions = "0777"  # Full permissions for debugging
         }
       }
     }

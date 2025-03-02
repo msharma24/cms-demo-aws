@@ -96,7 +96,7 @@ module "wordpress_service" {
         },
         {
           name  = "WORDPRESS_DATA_TO_PERSIST"
-          value = "wp-config.php .htaccess wp-content"
+          value = "wp-config.php .htaccess wp-content uploads"
         },
         {
           name  = "WP_DEBUG"
@@ -241,16 +241,30 @@ module "wordpress_service" {
         {
           name  = "WORDPRESS_RESET_DATA_PERMISSIONS"
           value = "yes"  # Force reset permissions on persisted data
+        },
+        {
+          name  = "WORDPRESS_EMAIL"
+          value = "admin@example.com"  # Email for admin user
+        },
+        {
+          name  = "WORDPRESS_FIRST_NAME"
+          value = "WordPress"  # First name for admin user
+        },
+        {
+          name  = "WORDPRESS_LAST_NAME"
+          value = "Admin"  # Last name for admin user
+        },
+        {
+          name  = "WORDPRESS_SKIP_BOOTSTRAP"
+          value = "no"  # Ensure bootstrap runs if needed
+        },
+        {
+          name  = "WORDPRESS_EXTRA_INSTALL_ARGS"
+          value = "--skip-email"  # Skip email notification during initial setup
         }
       ]
 
-      # Container initialization for EFS volumes using the root user for setup
-      entrypoint = ["/bin/bash", "-c"]
-      command    = [
-        "set -ex\n\n# Print debug info\necho \"Running as $(whoami) with ID $(id)\"\necho \"Checking filesystem access:\"\ntouch /tmp/test_write && echo \"/tmp is writable\" || echo \"/tmp is NOT writable\"\nmkdir -p /tmp/wordpress /tmp/apache /tmp/php\n\n# Set up directory structure in /tmp which is guaranteed to be writable\necho \"Creating temporary directories in /tmp...\"\nmkdir -p /tmp/wordpress\nmkdir -p /tmp/apache/conf/bitnami/certs\nmkdir -p /tmp/apache/conf/vhosts\nmkdir -p /tmp/apache/logs\nmkdir -p /tmp/apache/modules\nmkdir -p /tmp/php/etc\nmkdir -p /tmp/php/var/run\nmkdir -p /tmp/php/logs\n\n# Make /tmp directories world-writable\nchmod -R 777 /tmp/wordpress /tmp/apache /tmp/php\n\n# Copy configuration files from the container to /tmp\necho \"Copying configuration files to temporary directories...\"\nif [ -d /opt/bitnami/apache/conf ]; then\n  cp -a /opt/bitnami/apache/conf/* /tmp/apache/conf/\nfi\nif [ -d /opt/bitnami/php/etc ]; then\n  cp -a /opt/bitnami/php/etc/* /tmp/php/etc/\nfi\nif [ -d /opt/bitnami/apache/modules ]; then\n  cp -a /opt/bitnami/apache/modules/* /tmp/apache/modules/\nfi\n\n# Now create symlinks from the original locations to our /tmp directories\necho \"Creating symlinks to /tmp directories...\"\n\n# Backup original directories first\nif [ -d /opt/bitnami/apache/conf ]; then\n  mv /opt/bitnami/apache/conf /opt/bitnami/apache/conf.orig\nfi\nif [ -d /opt/bitnami/php/etc ]; then\n  mv /opt/bitnami/php/etc /opt/bitnami/php/etc.orig\nfi\nif [ -d /opt/bitnami/wordpress ]; then\n  mv /opt/bitnami/wordpress /opt/bitnami/wordpress.orig\nfi\nif [ -d /opt/bitnami/apache/logs ]; then\n  mv /opt/bitnami/apache/logs /opt/bitnami/apache/logs.orig\nfi\nif [ -d /opt/bitnami/apache/modules ]; then\n  mv /opt/bitnami/apache/modules /opt/bitnami/apache/modules.orig\nfi\n\n# Create symlinks to /tmp\nln -sfv /tmp/apache/conf /opt/bitnami/apache/conf\nln -sfv /tmp/php/etc /opt/bitnami/php/etc\nln -sfv /tmp/wordpress /opt/bitnami/wordpress\nln -sfv /tmp/apache/logs /opt/bitnami/apache/logs\nln -sfv /tmp/apache/modules /opt/bitnami/apache/modules\n\n# Create initial directory structure in the EFS volumes if possible\necho \"Attempting to create directory structure in EFS volumes...\"\nmkdir -p /bitnami/wordpress || echo \"Cannot create wordpress directory in EFS\"\nmkdir -p /bitnami/apache/conf/bitnami/certs || echo \"Cannot create apache conf directory in EFS\"\nmkdir -p /bitnami/php/etc || echo \"Cannot create php etc directory in EFS\"\n\n# Final check\necho \"Final directory structure:\"\nls -la /opt/bitnami/apache\nls -la /opt/bitnami/php\nls -la /tmp/apache\nls -la /tmp/php\nls -la /bitnami || echo \"/bitnami not visible\"\n\n# Run the original entrypoint\necho \"Starting WordPress with temporary directories...\"\nexec /opt/bitnami/scripts/wordpress/entrypoint.sh /opt/bitnami/scripts/apache/run.sh"
-      ]
-
-      # Run as root for initialization
+      # Run as root for debugging permissions
       user = "0:0"
 
       secrets = [
@@ -298,10 +312,6 @@ module "wordpress_service" {
           awslogs-stream-prefix = "wordpress"
         }
       }
-
-      # Return to default container entrypoint
-      entrypoint = []
-      command    = []
 
       # Explicitly disable read-only root filesystem
       readonly_root_filesystem = false
