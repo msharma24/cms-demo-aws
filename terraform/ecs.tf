@@ -261,6 +261,18 @@ module "wordpress_service" {
         {
           name  = "WORDPRESS_EXTRA_INSTALL_ARGS"
           value = "--skip-email"  # Skip email notification during initial setup
+        },
+        {
+          name  = "WORDPRESS_DATABASE_ENABLE_SSL"
+          value = "yes"  # Enable SSL for database connection security
+        },
+        {
+          name  = "WORDPRESS_DATABASE_WAIT_TIMEOUT"
+          value = "120"  # Wait up to 120 seconds for database to be ready
+        },
+        {
+          name  = "MARIADB_CLIENT_DEBUG"
+          value = "true"  # Enable debug mode for database client
         }
       ]
 

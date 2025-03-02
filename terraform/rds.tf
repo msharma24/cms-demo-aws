@@ -48,7 +48,8 @@ module "aurora_mysql" {
 
   # Authentication
   master_username = "wordpress_admin"
-  manage_master_user_password = true
+  master_password = random_password.rds_password.result
+  manage_master_user_password = false
 
   # Network
   vpc_id               = module.vpc.vpc_id
@@ -56,6 +57,12 @@ module "aurora_mysql" {
   security_group_rules = {
     vpc_ingress = {
       cidr_blocks = var.private_subnets_list
+    },
+    ecs_ingress = {
+      description              = "Allow WordPress ECS service to access database"
+      port                     = 3306
+      protocol                 = "tcp"
+      source_security_group_id = module.wordpress_service.security_group_id
     }
   }
 
