@@ -233,6 +233,14 @@ module "wordpress_service" {
         {
           name  = "ALLOW_OVERRIDE_NONE"
           value = "no"  # Allow .htaccess files
+        },
+        {
+          name  = "WORDPRESS_OVERRIDE_DATABASE_SETTINGS"
+          value = "yes"  # Force using environment variables for DB settings
+        },
+        {
+          name  = "WORDPRESS_RESET_DATA_PERMISSIONS"
+          value = "yes"  # Force reset permissions on persisted data
         }
       ]
 
