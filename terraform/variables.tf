@@ -33,3 +33,10 @@ variable "route53_dns_zone_name" {
   description = "The name of the Route53 DNS zone (e.g., example.com)"
   type        = string
 }
+
+variable "wordpress_admin_password" {
+  description = "Password for the WordPress admin user"
+  type        = string
+  sensitive   = true
+  default     = "Admin123!"  # This is just a default, should be overridden in production
+}

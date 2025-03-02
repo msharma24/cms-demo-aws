@@ -58,7 +58,7 @@ module "alb" {
   target_groups = {
     wordpress = {
       backend_protocol                  = "HTTP"
-      backend_port                      = 80
+      backend_port                      = 8080
       target_type                       = "ip"
       deregistration_delay              = 5
       load_balancing_cross_zone_enabled = true
@@ -66,13 +66,13 @@ module "alb" {
       health_check = {
         enabled             = true
         healthy_threshold   = 2
-        interval            = 30
+        interval            = 60
         matcher             = "200-399"
         path               = "/"
         port               = "traffic-port"
         protocol           = "HTTP"
-        timeout            = 10
-        unhealthy_threshold = 3
+        timeout            = 30
+        unhealthy_threshold = 5
       }
 
       # ECS will attach the IPs of the tasks to this target group
