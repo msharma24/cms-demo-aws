@@ -66,3 +66,24 @@ module "zones" {
 #   value       = module.zones.route53_zone_name_servers[var.route53_dns_zone_name]
 # } 
 
+# Route53 record for ALB
+module "wordpress_dns_record" {
+  source  = "terraform-aws-modules/route53/aws//modules/records"
+  version = "2.11.0"
+
+  zone_name = var.route53_dns_zone_name
+
+  records = [
+    {
+      name    = var.route53_dns_zone_name
+      type    = "A"
+      alias   = {
+        name                   = module.alb.dns_name
+        zone_id               = module.alb.zone_id
+        evaluate_target_health = true
+      }
+    }
+  ]
+
+  depends_on = [module.zones]
+}
