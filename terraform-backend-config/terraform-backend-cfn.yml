@@ -1,0 +1,58 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: >
+  [Do Not Delete]
+  CloudFormation Template to create  a S3 Bucket and a DynamoDB Table
+  for Terraform tfstate file management.
+Resources:
+  TerraformStateBucket:
+    Type: 'AWS::S3::Bucket'
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      AccessControl: Private
+      BucketName: !Sub 'terraform-state-backend-${AWS::AccountId}'
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: True
+        BlockPublicPolicy: True
+        IgnorePublicAcls: True
+        RestrictPublicBuckets: True
+      VersioningConfiguration:
+        Status: Enabled
+      Tags:
+        - Key: "Name"
+          Value: Terraform State Backend
+        - Key: "Managed  By"
+          Value: CloudFormation Stack
+
+  TerraformLockTable:
+    Type: 'AWS::DynamoDB::Table'
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: LockID
+          AttributeType: S
+      KeySchema:
+        - AttributeName: LockID
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+      TableName: !Sub 'terraform-state-backend-lock-${AWS::AccountId}'
+      Tags:
+        - Key: "Name"
+          Value: Terraform State Backend Lock
+        - Key: "Managed By"
+          Value: CloudFormation stack
+
+Outputs:
+  StackName:
+    Description: CloudFormation Stack Name
+    Value: !Ref AWS::StackName
+  TerraformStateBucketName:
+    Description: S3 Bucket for Terraform State Storage
+    Value: !Ref TerraformStateBucket
+  TerraformLockTable:
+    Description: DynamoDB for Terraform Stack Lock
+    Value: !Ref TerraformLockTable
