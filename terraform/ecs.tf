@@ -47,7 +47,7 @@ module "wordpress_service" {
   tasks_iam_role_statements = [
     {
       actions = [
-        "elasticfilesystem:*"  # Full EFS permissions
+        "elasticfilesystem:*" # Full EFS permissions
       ]
       resources = ["*"]
       effect    = "Allow"
@@ -124,11 +124,11 @@ module "wordpress_service" {
         },
         {
           name  = "WORDPRESS_SKIP_BOOTSTRAP"
-          value = "no"  # Ensure bootstrap runs
+          value = "no" # Ensure bootstrap runs
         },
         {
           name  = "WORDPRESS_ENABLE_HTTPS"
-          value = "no"  # Let ALB handle HTTPS
+          value = "no" # Let ALB handle HTTPS
         },
         {
           name  = "WORDPRESS_BLOG_NAME"
@@ -200,7 +200,7 @@ module "wordpress_service" {
         },
         {
           name  = "APACHE_ENABLE_CUSTOM_CONF"
-          value = "no"  # Disable custom conf until we fix permissions
+          value = "no" # Disable custom conf until we fix permissions
         },
         {
           name  = "APACHE_CONF_FILE"
@@ -212,15 +212,15 @@ module "wordpress_service" {
         },
         {
           name  = "APACHE_HTTPS_PORT_NUMBER"
-          value = "8443"  # Set different port for HTTPS even though we won't use it
+          value = "8443" # Set different port for HTTPS even though we won't use it
         },
         {
           name  = "APACHE_ALLOW_OVERRIDE"
-          value = "All"  # Enable .htaccess support
+          value = "All" # Enable .htaccess support
         },
         {
           name  = "APACHE_LOG_LEVEL"
-          value = "debug"  # Increase log level for debugging
+          value = "debug" # Increase log level for debugging
         },
         {
           name  = "BITNAMI_VOLUME_DIR"
@@ -228,151 +228,204 @@ module "wordpress_service" {
         },
         {
           name  = "WORDPRESS_FORCE_INITIALIZATION"
-          value = "yes"  # Force initialization
+          value = "yes" # Force initialization
         },
         {
           name  = "WORDPRESS_USERNAME"
-          value = "admin"  # Default admin username
+          value = "admin" # Default admin username
         },
         {
           name  = "WORDPRESS_ENABLE_HTTPS_REDIRECT"
-          value = "no"  # Disable HTTPS redirect
+          value = "no" # Disable HTTPS redirect
         },
         {
           name  = "ALLOW_OVERRIDE_NONE"
-          value = "no"  # Allow .htaccess files
+          value = "no" # Allow .htaccess files
         },
         {
           name  = "WORDPRESS_OVERRIDE_DATABASE_SETTINGS"
-          value = "yes"  # Use environment variables
+          value = "yes" # Use environment variables
         },
         {
           name  = "WORDPRESS_RESET_DATA_PERMISSIONS"
-          value = "yes"  # Force reset permissions on persisted data
+          value = "yes" # Force reset permissions on persisted data
         },
         {
           name  = "WORDPRESS_EMAIL"
-          value = "admin@example.com"  # Email for admin user
+          value = "admin@example.com" # Email for admin user
         },
         {
           name  = "WORDPRESS_FIRST_NAME"
-          value = "WordPress"  # First name for admin user
+          value = "WordPress" # First name for admin user
         },
         {
           name  = "WORDPRESS_LAST_NAME"
-          value = "Admin"  # Last name for admin user
+          value = "Admin" # Last name for admin user
         },
         {
           name  = "WORDPRESS_SKIP_BOOTSTRAP"
-          value = "no"  # Ensure bootstrap runs
+          value = "no" # Ensure bootstrap runs
         },
         {
           name  = "WORDPRESS_EXTRA_INSTALL_ARGS"
-          value = "--skip-email"  # Skip email notification during initial setup
+          value = "--skip-email" # Skip email notification during initial setup
         },
         {
           name  = "WORDPRESS_DATABASE_ENABLE_SSL"
-          value = "no"  # Consistently disable SSL for debugging
+          value = "no" # Consistently disable SSL for debugging
         },
         {
           name  = "WORDPRESS_DATABASE_WAIT_TIMEOUT"
-          value = "300"  # Increase wait timeout to 5 minutes
+          value = "300" # Increase wait timeout to 5 minutes
         },
         {
           name  = "MARIADB_CLIENT_DEBUG"
-          value = "true"  # Enable debug mode for database client
+          value = "true" # Enable debug mode for database client
         },
         {
           name  = "APACHE_ENABLE_SSL"
-          value = "no"  # Disable SSL in Apache since ALB handles SSL
+          value = "no" # Disable SSL in Apache since ALB handles SSL
         },
         {
           name  = "WORDPRESS_SCHEME"
-          value = "http"  # Use HTTP for internal communication
+          value = "http" # Use HTTP for internal communication
         },
         {
           name  = "WORDPRESS_SKIP_APACHE_SSL"
-          value = "yes"  # Skip Apache SSL setup
+          value = "yes" # Skip Apache SSL setup
         },
         {
           name  = "APACHE_DISABLE_SSL"
-          value = "yes"  # Explicitly disable SSL module
+          value = "yes" # Explicitly disable SSL module
         },
         {
           name  = "APACHE_SSL_ENABLE"
-          value = "no"  # Another way to disable SSL
+          value = "no" # Another way to disable SSL
         },
         {
           name  = "APACHE_MODULES"
-          value = "mpm_event_module unixd_module log_config_module authn_core_module authn_file_module authz_core_module authz_host_module auth_basic_module access_compat_module filter_module mime_module dir_module autoindex_module alias_module rewrite_module env_module headers_module setenvif_module"  # Updated module list
+          value = "mpm_event_module unixd_module log_config_module authn_core_module authn_file_module authz_core_module authz_host_module auth_basic_module access_compat_module filter_module mime_module dir_module autoindex_module alias_module rewrite_module env_module headers_module setenvif_module" # Updated module list
         },
         {
           name  = "APACHE_PREFIX"
-          value = "/opt/bitnami/apache"  # Explicitly set Apache prefix
+          value = "/opt/bitnami/apache" # Explicitly set Apache prefix
         },
         {
           name  = "APACHE_CONFIGURE_HTTPS_REDIRECT"
-          value = "no"  # Disable HTTPS redirect configuration
+          value = "no" # Disable HTTPS redirect configuration
         },
         {
           name  = "WORDPRESS_FORCE_DATABASE_INITIALIZATION"
-          value = "yes"  # Force database initialization
+          value = "yes" # Force database initialization
         },
         {
           name  = "WORDPRESS_VERIFY_DATABASE_SSL"
-          value = "no"  # Disable SSL verification
+          value = "no" # Disable SSL verification
         },
         {
           name  = "WORDPRESS_DATABASE_SSL_CA_FILE"
-          value = ""  # No SSL CA file
+          value = "" # No SSL CA file
         },
         {
           name  = "WORDPRESS_ENABLE_DATABASE_SSL"
-          value = "no"  # Consistently disable SSL for debugging
+          value = "no" # Consistently disable SSL for debugging
         },
         {
           name  = "WORDPRESS_RESET_DATABASE"
-          value = "no"  # Don't reset existing database
+          value = "no" # Don't reset existing database
         },
         {
           name  = "WORDPRESS_EXTRA_INSTALL_ARGS"
-          value = "--skip-email --skip-plugins"  # Skip additional setup steps
+          value = "--skip-email --skip-plugins" # Skip additional setup steps
         },
         {
           name  = "WORDPRESS_DEBUG_ENABLED"
-          value = "true"  # Enable WordPress debug mode
+          value = "true" # Enable WordPress debug mode
         },
         {
           name  = "WORDPRESS_DEBUG_LOG_ENABLED"
-          value = "true"  # Enable debug logging
+          value = "true" # Enable debug logging
         },
         {
           name  = "WORDPRESS_DEBUG_DISPLAY_ENABLED"
-          value = "true"  # Show debug messages
+          value = "true" # Show debug messages
         },
         {
           name  = "APACHE_REMOVE_SSL_CONF"
-          value = "yes"  # Remove SSL configuration files
+          value = "yes" # Remove SSL configuration files
         },
         {
           name  = "APACHE_DISABLE_SSL_CONFIGURATION"
-          value = "yes"  # Prevent SSL configuration loading
+          value = "yes" # Prevent SSL configuration loading
         },
         {
           name  = "APACHE_DISABLE_SSL_MODULE"
-          value = "yes"  # Disable SSL module loading
+          value = "yes" # Disable SSL module loading
         },
         {
           name  = "APACHE_SKIP_SSL_MODULE"
-          value = "yes"  # Skip SSL module loading
+          value = "yes" # Skip SSL module loading
         }
       ]
 
-      # Run as root for debugging permissions
+      # Run as root user for full permissions
       user = "0:0"
 
       entrypoint = ["/bin/bash", "-c"]
-      command = ["echo 'Starting WordPress...' && echo 'Waiting for database connection...' && for i in $(seq 1 30); do if mysql -h\"$WORDPRESS_DATABASE_HOST\" -u\"$WORDPRESS_DATABASE_USER\" -p\"$WORDPRESS_DATABASE_PASSWORD\" -e \"SELECT 1;\" >/dev/null 2>&1; then echo 'Database connection successful'; break; else echo 'Waiting for database connection...'; sleep 10; fi; done && echo 'Running WordPress setup...' && source /opt/bitnami/scripts/libbitnami.sh && source /opt/bitnami/scripts/liblog.sh && source /opt/bitnami/scripts/libos.sh && source /opt/bitnami/scripts/libvalidations.sh && source /opt/bitnami/scripts/libwebserver.sh && source /opt/bitnami/scripts/libwordpress.sh && source /opt/bitnami/scripts/wordpress-env.sh && source /opt/bitnami/scripts/php-env.sh && source /opt/bitnami/scripts/mysql-client-env.sh && source /opt/bitnami/scripts/apache-env.sh && /opt/bitnami/scripts/wordpress/setup.sh && echo 'WordPress initialized.' && exec /opt/bitnami/scripts/wordpress/entrypoint.sh /opt/bitnami/scripts/apache/run.sh"]
+      command = [<<-EOT
+        echo 'Starting WordPress...' && \
+        echo 'Waiting for database connection...' && \
+        for i in $(seq 1 30); do 
+          if mysql -h"$WORDPRESS_DATABASE_HOST" -u"$WORDPRESS_DATABASE_USER" -p"$WORDPRESS_DATABASE_PASSWORD" -e "SELECT 1;" >/dev/null 2>&1; then 
+            echo 'Database connection successful'
+            break
+          else 
+            echo 'Waiting for database connection...'
+            sleep 10
+          fi
+        done && \
+        
+        # Ensure directories exist with proper permissions
+        for dir in /bitnami/wordpress /bitnami/apache /bitnami/php; do
+          echo "Setting up directory: $dir" && \
+          mkdir -p "$dir" && \
+          chmod -R 777 "$dir"
+        done && \
+        
+        # Copy default WordPress files if not exists
+        if [ ! -f /bitnami/wordpress/wp-config.php ]; then
+          echo "Copying WordPress files..." && \
+          cp -rf /opt/bitnami/wordpress/* /bitnami/wordpress/ && \
+          chmod -R 777 /bitnami/wordpress
+        fi && \
+        
+        # Source Bitnami scripts
+        source /opt/bitnami/scripts/libbitnami.sh && \
+        source /opt/bitnami/scripts/liblog.sh && \
+        source /opt/bitnami/scripts/libos.sh && \
+        source /opt/bitnami/scripts/libvalidations.sh && \
+        source /opt/bitnami/scripts/libwebserver.sh && \
+        source /opt/bitnami/scripts/libwordpress.sh && \
+        source /opt/bitnami/scripts/wordpress-env.sh && \
+        source /opt/bitnami/scripts/php-env.sh && \
+        source /opt/bitnami/scripts/mysql-client-env.sh && \
+        source /opt/bitnami/scripts/apache-env.sh && \
+        
+        # Run WordPress setup
+        echo "Running WordPress setup..." && \
+        WORDPRESS_SKIP_BOOTSTRAP=no /opt/bitnami/scripts/wordpress/setup.sh && \
+        
+        # Ensure proper permissions after setup
+        echo "Setting final permissions..." && \
+        chmod -R 777 /bitnami/wordpress && \
+        chmod -R 777 /bitnami/apache && \
+        chmod -R 777 /bitnami/php && \
+        
+        # Start Apache
+        echo "Starting Apache..." && \
+        exec /opt/bitnami/scripts/apache/run.sh
+      EOT
+      ]
 
       secrets = [
         {
@@ -393,7 +446,7 @@ module "wordpress_service" {
         },
         {
           sourceVolume  = "apache-data"
-          containerPath = "/bitnami/apache"  # Mount at base Apache directory
+          containerPath = "/bitnami/apache"
           readOnly      = false
         },
         {
@@ -432,7 +485,7 @@ module "wordpress_service" {
         file_system_id          = module.efs.id
         root_directory          = "/"
         transit_encryption      = "ENABLED"
-        transit_encryption_port = 2049  # Standard NFS port
+        transit_encryption_port = 2049
         authorization_config = {
           access_point_id = module.efs.access_points["wordpress"].id
           iam             = "ENABLED"
@@ -445,7 +498,7 @@ module "wordpress_service" {
         file_system_id          = module.efs.id
         root_directory          = "/"
         transit_encryption      = "ENABLED"
-        transit_encryption_port = 2050  # Use unique port for Apache
+        transit_encryption_port = 2050
         authorization_config = {
           access_point_id = module.efs.access_points["apache"].id
           iam             = "ENABLED"
@@ -458,7 +511,7 @@ module "wordpress_service" {
         file_system_id          = module.efs.id
         root_directory          = "/"
         transit_encryption      = "ENABLED"
-        transit_encryption_port = 2051  # Use unique port for PHP
+        transit_encryption_port = 2051
         authorization_config = {
           access_point_id = module.efs.access_points["php"].id
           iam             = "ENABLED"
@@ -525,12 +578,12 @@ module "wordpress_service" {
       health_check = {
         enabled             = true
         healthy_threshold   = 2
-        interval           = 60
-        matcher            = "200-499"  # Accept more status codes during debugging
-        path               = "/"
-        port               = "traffic-port"
-        protocol           = "HTTP"
-        timeout           = 30
+        interval            = 60
+        matcher             = "200-499" # Accept more status codes during debugging
+        path                = "/"
+        port                = "traffic-port"
+        protocol            = "HTTP"
+        timeout             = 30
         unhealthy_threshold = 5
       }
       deregistration_delay = 120
@@ -593,7 +646,7 @@ resource "aws_ssm_parameter" "wordpress_admin_password" {
   description = "WordPress admin password"
   type        = "SecureString"
   value       = var.wordpress_admin_password
-  
+
   tags = {
     Environment = var.environment
     Terraform   = "true"
