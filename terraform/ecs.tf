@@ -124,7 +124,7 @@ module "wordpress_service" {
         },
         {
           name  = "WORDPRESS_SKIP_BOOTSTRAP"
-          value = "no"
+          value = "no"  # Ensure bootstrap runs
         },
         {
           name  = "WORDPRESS_ENABLE_HTTPS"
@@ -228,7 +228,7 @@ module "wordpress_service" {
         },
         {
           name  = "WORDPRESS_FORCE_INITIALIZATION"
-          value = "yes"  # Force initialization to ensure proper setup
+          value = "yes"  # Force initialization
         },
         {
           name  = "WORDPRESS_USERNAME"
@@ -244,7 +244,7 @@ module "wordpress_service" {
         },
         {
           name  = "WORDPRESS_OVERRIDE_DATABASE_SETTINGS"
-          value = "yes"  # Force using environment variables for DB settings
+          value = "yes"  # Use environment variables
         },
         {
           name  = "WORDPRESS_RESET_DATA_PERMISSIONS"
@@ -264,7 +264,7 @@ module "wordpress_service" {
         },
         {
           name  = "WORDPRESS_SKIP_BOOTSTRAP"
-          value = "no"  # Ensure bootstrap runs if needed
+          value = "no"  # Ensure bootstrap runs
         },
         {
           name  = "WORDPRESS_EXTRA_INSTALL_ARGS"
@@ -272,7 +272,7 @@ module "wordpress_service" {
         },
         {
           name  = "WORDPRESS_DATABASE_ENABLE_SSL"
-          value = "yes"  # Enable SSL for database connection security
+          value = "no"  # Consistently disable SSL for debugging
         },
         {
           name  = "WORDPRESS_DATABASE_WAIT_TIMEOUT"
@@ -320,23 +320,19 @@ module "wordpress_service" {
         },
         {
           name  = "WORDPRESS_VERIFY_DATABASE_SSL"
-          value = "no"  # Temporarily disable SSL verification for debugging
+          value = "no"  # Disable SSL verification
         },
         {
           name  = "WORDPRESS_DATABASE_SSL_CA_FILE"
-          value = ""  # Clear SSL CA file path
+          value = ""  # No SSL CA file
         },
         {
           name  = "WORDPRESS_ENABLE_DATABASE_SSL"
-          value = "no"  # Temporarily disable SSL for debugging
-        },
-        {
-          name  = "WORDPRESS_OVERRIDE_DATABASE_SETTINGS"
-          value = "yes"  # Force using environment variables
+          value = "no"  # Consistently disable SSL for debugging
         },
         {
           name  = "WORDPRESS_RESET_DATABASE"
-          value = "yes"  # Force database reset if needed
+          value = "no"  # Don't reset existing database
         },
         {
           name  = "WORDPRESS_EXTRA_INSTALL_ARGS"
@@ -376,7 +372,7 @@ module "wordpress_service" {
       user = "0:0"
 
       entrypoint = ["/bin/bash", "-c"]
-      command = ["echo 'Cleaning up EFS mounts...' && rm -rf /bitnami/apache/* && rm -rf /bitnami/php/* && echo 'Removing SSL files and configurations...' && rm -rf /opt/bitnami/apache/conf/bitnami/certs && rm -f /opt/bitnami/apache/conf/bitnami/bitnami-ssl.conf && rm -f /opt/bitnami/apache/conf/extra/httpd-ssl.conf && rm -f /opt/bitnami/apache/conf/server.crt && rm -f /opt/bitnami/apache/conf/server.key && echo 'Creating minimal Apache configuration...' && echo 'ServerRoot \"/opt/bitnami/apache\"\nPidFile logs/httpd.pid\nListen 8080\nLoadModule mpm_event_module modules/mod_mpm_event.so\nLoadModule unixd_module modules/mod_unixd.so\nLoadModule log_config_module modules/mod_log_config.so\nLoadModule authn_core_module modules/mod_authn_core.so\nLoadModule authn_file_module modules/mod_authn_file.so\nLoadModule authz_core_module modules/mod_authz_core.so\nLoadModule authz_host_module modules/mod_authz_host.so\nLoadModule auth_basic_module modules/mod_auth_basic.so\nLoadModule access_compat_module modules/mod_access_compat.so\nLoadModule filter_module modules/mod_filter.so\nLoadModule mime_module modules/mod_mime.so\nLoadModule dir_module modules/mod_dir.so\nLoadModule autoindex_module modules/mod_autoindex.so\nLoadModule alias_module modules/mod_alias.so\nLoadModule rewrite_module modules/mod_rewrite.so\nLoadModule env_module modules/mod_env.so\nLoadModule headers_module modules/mod_headers.so\nLoadModule setenvif_module modules/mod_setenvif.so\n\nUser daemon\nGroup daemon\n\nServerAdmin admin@example.com\nServerName localhost\n\nDocumentRoot \"/opt/bitnami/wordpress\"\n\n<Directory />\n    AllowOverride none\n    Require all denied\n</Directory>\n\n<Directory \"/opt/bitnami/wordpress\">\n    Options FollowSymLinks\n    AllowOverride All\n    Require all granted\n</Directory>\n\n<Files \".ht*\">\n    Require all denied\n</Files>\n\nErrorLog logs/error.log\nLogLevel debug\nLogFormat \"%h %l %u %t \\\"%r\\\" %>s %b \\\"%%{Referer}i\\\" \\\"%%{User-Agent}i\\\"\" combined\nCustomLog logs/access.log combined\n\nTypesConfig conf/mime.types\nAddType application/x-compress .Z\nAddType application/x-gzip .gz .tgz\n\nDirectoryIndex index.html index.php\n\nEnableSendfile on' > /opt/bitnami/apache/conf/httpd.conf && chmod 644 /opt/bitnami/apache/conf/httpd.conf && mkdir -p /opt/bitnami/apache/conf/bitnami && mkdir -p /opt/bitnami/apache/logs && chown -R daemon:daemon /opt/bitnami/apache/logs && echo 'Apache configuration created.' && echo 'Starting WordPress...' && exec /opt/bitnami/scripts/wordpress/entrypoint.sh /opt/bitnami/scripts/apache/run.sh"]
+      command = ["echo 'Starting WordPress...' && echo 'Waiting for database connection...' && for i in $(seq 1 30); do if mysql -h\"$WORDPRESS_DATABASE_HOST\" -u\"$WORDPRESS_DATABASE_USER\" -p\"$WORDPRESS_DATABASE_PASSWORD\" -e \"SELECT 1;\" >/dev/null 2>&1; then echo 'Database connection successful'; break; else echo 'Waiting for database connection...'; sleep 10; fi; done && echo 'Running WordPress setup...' && source /opt/bitnami/scripts/libbitnami.sh && source /opt/bitnami/scripts/liblog.sh && source /opt/bitnami/scripts/libos.sh && source /opt/bitnami/scripts/libvalidations.sh && source /opt/bitnami/scripts/libwebserver.sh && source /opt/bitnami/scripts/libwordpress.sh && source /opt/bitnami/scripts/wordpress-env.sh && source /opt/bitnami/scripts/php-env.sh && source /opt/bitnami/scripts/mysql-client-env.sh && source /opt/bitnami/scripts/apache-env.sh && /opt/bitnami/scripts/wordpress/setup.sh && echo 'WordPress initialized.' && exec /opt/bitnami/scripts/wordpress/entrypoint.sh /opt/bitnami/scripts/apache/run.sh"]
 
       secrets = [
         {

@@ -75,7 +75,7 @@ module "wordpress_dns_record" {
 
   records = [
     {
-      name    = var.route53_dns_zone_name
+      name    = ""
       type    = "A"
       alias   = {
         name                   = module.alb.dns_name
