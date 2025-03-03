@@ -421,6 +421,26 @@ module "wordpress_service" {
         chmod -R 777 /bitnami/apache && \
         chmod -R 777 /bitnami/php && \
         
+        # Remove SSL configuration files
+        echo "Removing SSL configuration files..." && \
+        rm -f /opt/bitnami/apache/conf/vhosts/wordpress-https-vhost.conf && \
+        rm -f /opt/bitnami/apache/conf/bitnami/certs/server.* && \
+        
+        # Create a minimal non-SSL vhost configuration
+        echo "Creating non-SSL vhost configuration..." && \
+        cat > /opt/bitnami/apache/conf/vhosts/wordpress-vhost.conf << 'EOF'
+<VirtualHost _default_:8080>
+    DocumentRoot "/bitnami/wordpress"
+    <Directory "/bitnami/wordpress">
+        Options -Indexes +FollowSymLinks -MultiViews
+        AllowOverride All
+        Require all granted
+    </Directory>
+    ErrorLog "/dev/stdout"
+    CustomLog "/dev/stdout" common
+</VirtualHost>
+EOF
+        
         # Start Apache
         echo "Starting Apache..." && \
         exec /opt/bitnami/scripts/apache/run.sh
