@@ -195,11 +195,18 @@ Build a custom Docker image that:
 - Redis cache to reduce database load
 
 ## Backup and Recovery
-- RDS automated backups
-- EFS backup policies
-- WordPress content persistence
-- Multi-AZ deployments
-- Disaster recovery capabilities
+- RDS automated backups (7-day retention)
+- WordPress content persistence through EFS
+- Multi-AZ deployments for high availability
+  - RDS Aurora Multi-AZ
+  - Redis Multi-AZ with automatic failover
+  - ECS tasks across multiple AZs
+- **Note**: EFS backups are currently not configured. Recommended to implement:
+  - AWS Backup service integration
+  - Regular backup schedule (daily/weekly)
+  - Cross-region backup copies
+  - Retention policy management
+  - Point-in-time recovery capability
 
 ## Terraform Backend Setup
 
