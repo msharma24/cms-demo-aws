@@ -25,10 +25,10 @@ module "aurora_mysql" {
   source  = "terraform-aws-modules/rds-aurora/aws"
   version = "9.12.0"
 
-  name              = "cms-${var.environment}-mysql"
-  engine            = "aurora-mysql"
-  engine_version    = "8.0"
-  engine_mode       = "provisioned"
+  name           = "cms-${var.environment}-mysql"
+  engine         = "aurora-mysql"
+  engine_version = "8.0"
+  engine_mode    = "provisioned"
   serverlessv2_scaling_configuration = {
     min_capacity = 0.5
     max_capacity = 4
@@ -46,9 +46,11 @@ module "aurora_mysql" {
   storage_encrypted = true
   storage_type      = "aurora"
 
+  database_name = "wordpress"
+
   # Authentication
-  master_username = "wordpress_admin"
-  master_password = random_password.rds_password.result
+  master_username             = "wordpress_admin"
+  master_password             = random_password.rds_password.result
   manage_master_user_password = false
 
   # Network
@@ -67,22 +69,22 @@ module "aurora_mysql" {
   }
 
   # Monitoring and maintenance
-  monitoring_interval = 60
+  monitoring_interval             = 60
   enabled_cloudwatch_logs_exports = ["audit", "error", "general", "slowquery"]
-  
+
   # Backup and maintenance
-  backup_retention_period = 7
-  preferred_backup_window = "03:00-04:00"
+  backup_retention_period      = 7
+  preferred_backup_window      = "03:00-04:00"
   preferred_maintenance_window = "sun:05:00-sun:09:00"
 
   # Performance Insights
-  performance_insights_enabled = true
+  performance_insights_enabled          = true
   performance_insights_retention_period = 7
 
   # Database parameters
-  db_parameter_group_family = "aurora-mysql8.0"
+  db_parameter_group_family         = "aurora-mysql8.0"
   db_cluster_parameter_group_family = "aurora-mysql8.0"
-  
+
   db_cluster_parameter_group_parameters = [
     {
       name  = "slow_query_log"
@@ -98,8 +100,8 @@ module "aurora_mysql" {
     }
   ]
 
-  apply_immediately   = true
-  skip_final_snapshot = false
+  apply_immediately         = true
+  skip_final_snapshot       = false
   final_snapshot_identifier = "cms-${var.environment}-mysql-final-snapshot"
 
   tags = {
@@ -108,4 +110,5 @@ module "aurora_mysql" {
     Project     = "cms"
     Service     = "wordpress"
   }
-} 
+}
+
