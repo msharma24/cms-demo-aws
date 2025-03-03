@@ -38,7 +38,7 @@ module "wordpress_service" {
 
   name                   = "wordpress"
   cluster_arn            = module.ecs_cluster.cluster_arn
-  desired_count          = 1
+  desired_count          = 2
   launch_type            = "FARGATE"
   subnet_ids             = module.vpc.private_subnets
   enable_execute_command = true
@@ -374,16 +374,9 @@ module "wordpress_service" {
       entrypoint = ["/bin/bash", "-c"]
       command = [<<-EOT
         echo 'Starting WordPress...' && \
-        echo 'Waiting for database connection...' && \
-        for i in $(seq 1 30); do 
-          if mysql -h"$WORDPRESS_DATABASE_HOST" -u"$WORDPRESS_DATABASE_USER" -p"$WORDPRESS_DATABASE_PASSWORD" -e "SELECT 1;" >/dev/null 2>&1; then 
-            echo 'Database connection successful'
-            break
-          else 
-            echo 'Waiting for database connection...'
-            sleep 10
-          fi
-        done && \
+        
+        # Check for lock file in persistent storage
+        LOCK_FILE="/bitnami/wordpress/.wordpress_initialized"
         
         # Ensure directories exist with proper permissions
         for dir in /bitnami/wordpress /bitnami/apache /bitnami/php; do
@@ -391,13 +384,6 @@ module "wordpress_service" {
           mkdir -p "$dir" && \
           chmod -R 777 "$dir"
         done && \
-        
-        # Copy default WordPress files if not exists
-        if [ ! -f /bitnami/wordpress/wp-config.php ]; then
-          echo "Copying WordPress files..." && \
-          cp -rf /opt/bitnami/wordpress/* /bitnami/wordpress/ && \
-          chmod -R 777 /bitnami/wordpress
-        fi && \
         
         # Source Bitnami scripts
         source /opt/bitnami/scripts/libbitnami.sh && \
@@ -411,9 +397,39 @@ module "wordpress_service" {
         source /opt/bitnami/scripts/mysql-client-env.sh && \
         source /opt/bitnami/scripts/apache-env.sh && \
         
-        # Run WordPress setup
-        echo "Running WordPress setup..." && \
-        WORDPRESS_SKIP_BOOTSTRAP=no /opt/bitnami/scripts/wordpress/setup.sh && \
+        if [ ! -f "$LOCK_FILE" ]; then
+          echo "Lock file not found. Performing first-time WordPress setup..." && \
+          
+          echo 'Waiting for database connection...' && \
+          for i in $(seq 1 30); do 
+            if mysql -h"$WORDPRESS_DATABASE_HOST" -u"$WORDPRESS_DATABASE_USER" -p"$WORDPRESS_DATABASE_PASSWORD" -e "SELECT 1;" >/dev/null 2>&1; then 
+              echo 'Database connection successful'
+              break
+            else 
+              echo 'Waiting for database connection...'
+              sleep 10
+            fi
+          done && \
+          
+          # Copy default WordPress files if not exists
+          if [ ! -f /bitnami/wordpress/wp-config.php ]; then
+            echo "Copying WordPress files..." && \
+            cp -rf /opt/bitnami/wordpress/* /bitnami/wordpress/ && \
+            chmod -R 777 /bitnami/wordpress
+          fi && \
+          
+          # Run WordPress setup
+          echo "Running WordPress setup..." && \
+          WORDPRESS_SKIP_BOOTSTRAP=no /opt/bitnami/scripts/wordpress/setup.sh && \
+          
+          # Create lock file with timestamp
+          echo "$(date -u) - WordPress initialized" > "$LOCK_FILE" && \
+          echo "WordPress initialization completed."
+        else
+          echo "Lock file found. WordPress already initialized on $(cat "$LOCK_FILE")" && \
+          echo "Skipping initialization..." && \
+          WORDPRESS_SKIP_BOOTSTRAP=yes /opt/bitnami/scripts/wordpress/setup.sh
+        fi && \
         
         # Ensure proper permissions after setup
         echo "Setting final permissions..." && \
