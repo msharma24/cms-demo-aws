@@ -1,2 +1,6 @@
 .terraform
 labs.txt
+terraform/.terraform/terraform.tfstate
+terraform/.terraform/terraform.tfstate.backup
+terraform/.terraform/terraform.tfstate.lock.info
+terraform/.terraform*
