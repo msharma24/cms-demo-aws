@@ -16,6 +16,8 @@ module "vpc" {
   enable_dns_hostnames = true
   enable_dns_support   = true
 
+  enable_flow_logs = true
+
   # Tags for all resources
   tags = {
     Environment = var.environment
